@@ -11,7 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using apimapi.Services;
-using Swashbuckle.AspNetCore.Swagger;
+using Microsoft.OpenApi.Models;
 
 namespace apimapi
 {
@@ -30,12 +30,11 @@ namespace apimapi
             services.AddScoped<SupplementService>();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new Info
-                {
-                    Title = "Supplement API",
-                    Version = "v1",
-                    Description = "Supplement API tutorial using MongoDB",
-                });
+               // Register the Swagger generator, defining 1 or more Swagger documents
+    services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "My  suplement API in container", Version = "v1" });
+    });
             });
 
             services.AddControllers();
@@ -48,11 +47,16 @@ namespace apimapi
             {
                 app.UseDeveloperExceptionPage();
             }
-             app.UseSwagger();
-            app.UseSwaggerUI(c =>
-            {
-                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Supplement V1");
-            });
+          // Enable middleware to serve generated Swagger as a JSON endpoint.
+    app.UseSwagger();
+
+    // Enable middleware to serve swagger-ui (HTML, JS, CSS, etc.),
+    // specifying the Swagger JSON endpoint.
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Suupplement api in container V1");
+    });
+
 
             app.UseHttpsRedirection();
 

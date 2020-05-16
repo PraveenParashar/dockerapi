@@ -15,10 +15,13 @@ services:
   web:
         build: .
         ports:
-            - "8000:80"
+            - "8082:80"
             - "44348:443"
         depends_on:
             - mongo
+        volumes:
+            - ${HOME}/.microsoft/usersecrets/:/root/.microsoft/usersecrets
+            - ${HOME}/.aspnet/https:/root/.aspnet/https/     
         
         links:
           - mongo
