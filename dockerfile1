@@ -1,0 +1,88 @@
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 As build
+WORKDIR /src
+COPY ["apimapi.csproj","./"]
+RUN dotnet restore "./apimapi.csproj"
+WORKDIR "/src/."
+RUN dotnet build "apimapi.csproj" -c Release -o /app/build
+
+FROM build AS publish
+RUN dotnet publish "apimapi.csproj" -c Release -o /app/publish
+
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT [ "dotnet","apimapi.dll" ]
+
+# Copy csproj and restore as distinct layers
+COPY *.csproj ./
+RUN dotnet restore
+
+COPY . .
+WORKDIR "/src/."
+RUN dotnet build  "apimapi.csproj" -c Release -o /app/build
+
+
+# Copy everything else and build
+COPY . ./
+RUN dotnet publish -c Release -o out /app/publish
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS runtime
+WORKDIR /app
+COPY --from=publish /app/publish .
+ENTRYPOINT ["dotnet", "SupplementCRUDAPI.dll"]
+
+
+
+===============Correct on from WEB =============
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
+WORKDIR /app
+
+# Copy csproj and restore as distinct layers
+COPY *.csproj ./
+RUN dotnet restore
+
+# Copy everything else and build
+COPY . ./
+RUN dotnet publish -c Release -o out
+
+# Build runtime image
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1 AS runtime
+WORKDIR /app
+COPY --from=build-env /app/out .
+ENTRYPOINT ["dotnet", "apimapi.dll"]
+============================================================
+==========Compose file
+version: '3.1'
+
+services:
+
+  mongo:
+    container_name: mongo
+    image: mongo
+    restart: always
+    volumes:
+      - ${WEBAPP_STORAGE_HOME}/site:/data/db
+      #- ./data:/data/db
+    ports:
+      - "27017:27017"
+
+  web:
+        build: .
+        ports:
+            - "8000:80"
+            - "44348:443"
+        depends_on:
+            - mongo
+        volumes:
+            - ${HOME}/.microsoft/usersecrets/:/root/.microsoft/usersecrets
+            - ${HOME}/.aspnet/https:/root/.aspnet/https/
+        links:
+          - mongo
+
+FOr Docker Compose===========================================
