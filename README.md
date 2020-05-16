@@ -5,6 +5,7 @@ dotnet --info
 
 <h3>Docker File<h3>
 Dockerfile
+    <code>
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1 AS build-env
 WORKDIR /app
 
@@ -21,7 +22,7 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1
 WORKDIR /app
 COPY --from=build-env /app/out .
 ENTRYPOINT ["dotnet", "aspnetapp.dll"]
-
+ </code>
 dockerignore file
 https://docs.docker.com/engine/reference/builder/#dockerignore-file
 
@@ -37,7 +38,8 @@ View the web page running from a container
 
 
 <h2>Docker Compose<h2>
-version: '3.1'
+ <code>
+    version: '3.1'
 
 services:
 
@@ -65,8 +67,10 @@ services:
         links:
           - mongo
 
-
+ </code>
 <h2>appsetting<h2>
+
+ <code>
 {
   "ConnectionStrings": {
     "SupplementDB": "mongodb://mongo:27017"
@@ -82,3 +86,4 @@ services:
   },
   "AllowedHosts": "*"
 }
+ </code>
